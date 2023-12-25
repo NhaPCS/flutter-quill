@@ -208,8 +208,13 @@ class QuillRawEditorState extends EditorState
 
     // TODO: Bug, Doesn't replace the selected text, it just add a new one
 
-    final reader = await ClipboardReader.readClipboard();
-    if (reader.canProvide(Formats.htmlText)) {
+    final reader = await SystemClipboard.instance?.read();
+    if (reader == null) {
+      return;
+    }
+
+    if (!reader.platformFormats.contains('com.apple.notes.richtext') &&
+        reader.canProvide(Formats.htmlText)) {
       final html = await reader.readValue(Formats.htmlText);
       if (html == null) {
         return;
@@ -279,7 +284,10 @@ class QuillRawEditorState extends EditorState
 
     final onImagePaste = widget.configurations.onImagePaste;
     if (onImagePaste != null) {
-      final reader = await ClipboardReader.readClipboard();
+      final reader = await SystemClipboard.instance?.read();
+      if (reader == null) {
+        return;
+      }
       if (!reader.canProvide(Formats.png)) {
         return;
       }
